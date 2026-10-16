@@ -1,0 +1,46 @@
+plugins {
+    id 'com.android.application'
+}
+
+def ksFile = System.getenv('KEYSTORE_FILE')
+def runNo = Integer.parseInt(System.getenv('GITHUB_RUN_NUMBER') ?: '1')
+
+android {
+    namespace 'ed.vault'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'ed.vault.notes'
+        minSdk 30
+        targetSdk 35
+        versionCode runNo
+        versionName "1.${runNo}"
+    }
+
+    signingConfigs {
+        release {
+            if (ksFile) {
+                storeFile file(ksFile)
+                storePassword System.getenv('KEYSTORE_PASSWORD')
+                keyAlias 'vault'
+                keyPassword System.getenv('KEYSTORE_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt')
+            signingConfig ksFile ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    dependenciesInfo { includeInApk false; includeInBundle false }
+}
